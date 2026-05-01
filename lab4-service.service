@@ -1,0 +1,13 @@
+[Unit]
+Description=Lab 4 Python HTTP Service
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+ExecStart=/opt/lab4-service/service.sh
+Restart=always
+WorkingDirectory=/opt/lab4-service
+
+[Install]
+WantedBy=multi-user.target
