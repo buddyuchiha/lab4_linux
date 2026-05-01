@@ -1,0 +1,6 @@
+*.pyc
+__pycache__/
+venv/
+inventory.ini
+.ansible_cache
+*.logvenv/
