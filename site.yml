@@ -1,0 +1,63 @@
+---
+- name: Deploy Lab 4 Service
+  hosts: lab4
+  become: true
+
+  tasks:
+    - name: 1. Install required packages
+      apt:
+        name:
+          - git
+          - curl
+          - python3
+        state: present
+        update_cache: yes
+
+    - name: 2. Create service directories
+      file:
+        path: /opt/lab4-service/html
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+        recurse: yes
+
+    - name: 3. Deploy index.html with surname
+      copy:
+        content: '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><h1>Student: Турманидзе</h1></body></html>'
+        dest: /opt/lab4-service/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    - name: 4. Copy service.sh to /opt
+      copy:
+        src: service.sh
+        dest: /opt/lab4-service/service.sh
+        owner: www-data
+        group: www-data
+        mode: '0755'
+
+    - name: 5. Copy systemd unit file
+      copy:
+        src: lab4-service.service
+        dest: /etc/systemd/system/lab4-service.service
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: 6. Reload systemd and restart service
+      systemd:
+        name: lab4-service
+        enabled: yes
+        state: restarted
+        daemon_reload: yes
+
+    - name: 7. Healthcheck via Ansible (URI module)
+      uri:
+        url: http://127.0.0.1:8000/
+        status_code: 200
+      register: result
+      until: result.status == 200
+      retries: 5
+      delay: 2
